@@ -34,44 +34,56 @@
 
 /* Author: Ali Sacakli */
 
-#include "../include/grippercontrol/grippercontrol.h"
+//#include <grippercontrol/grippercontrol.h>
+
+#include <ros/ros.h>
+#include <stdio.h>
+#include <std_msgs/Float64.h>
+#include <iimoveit/robot_interface.h>
+#include <robotiq_s_model_control/s_model_msg_client.h>
+#include <robotiq_s_model_control/s_model_api.h>
+
 
 //double omega_angle;
-grippercontrol greifer;
+//grippercontrol greifer;
 double omega_angle;
+double riq_angle;
+ros::NodeHandle n;
+boost::shared_ptr<robotiq_s_model_control::SModelMsgClient> sModelMsgClient(new robotiq_s_model_control::SModelMsgClient(*n));
+robotiq_s_model_control::SModelAPI riq_gripper(sModelMsgClient);
 
-void grippercontrol::setRobotiqAngle(double angle){
-    angleDeg = -(90/28)*angle + 90;
-    riq_gripper.setRawPosition(angleDeg);
-    riq_gripper.write();
-}
+// void grippercontrol::setRobotiqAngle(double angle){
+//     angleDeg = -(90/28)*angle + 90;
+//     riq_gripper.setRawPosition(angleDeg);
+//     riq_gripper.write();
+// }
 
-void grippercontrol::initRobotiq() {
-    ROS_INFO("Initializing riq_gripper...");
-    /*riq_gripper.setInitialization(INIT_ACTIVATION);
-    riq_gripper.setGraspingMode(GRASP_PINCH);
-    riq_gripper.setActionMode(ACTION_GO); */
-    riq_gripper.setRawVelocity(255);
-    riq_gripper.setRawForce(1);
-    riq_gripper.setRawPosition(0);
-    riq_gripper.write();
-}
+// void grippercontrol::initRobotiq() {
+//     ROS_INFO("Initializing riq_gripper...");
+//     /*riq_gripper.setInitialization(INIT_ACTIVATION);
+//     riq_gripper.setGraspingMode(GRASP_PINCH);
+//     riq_gripper.setActionMode(ACTION_GO); */
+//     riq_gripper.setRawVelocity(255);
+//     riq_gripper.setRawForce(1);
+//     riq_gripper.setRawPosition(0);
+//     riq_gripper.write();
+// }
 
-void gripperCallback(const std_msgs::Float64 msg){
+void gripperCallback(const std_msgs::Float64& msg){
 
-    omega_angle = msg;
-    greifer.setRobotiqAngle(omega_angle);
-    //riq_angle = -(9/28)*omega_angle +90;
+    omega_angle = msg.data;
+    //greifer.setRobotiqAngle(omega_angle);
+    riq_angle = -(9/28)*omega_angle +90;
     //riq_gripper.setRobotiqAngle(riq_angle);
-    //riq_gripper.setRawPosition(riq_angle);
-    //riq_gripper.write();
+    riq_gripper.setRawPosition(riq_angle);
+    riq_gripper.write();
 }
 
 
 int main(int argc, char ** argv){
     ros::init(argc, argv, "grippercontrol");
-    ros::NodeHandle n;
-    ros::Subscriber sub = n.subscribe("GripperAngle", 1000, gripperCallback);
+    //ros::NodeHandle n;
+    ros::Subscriber sub = n.subscribe("GripperAngle", 1, gripperCallback);
     
     ros::spin();
 }

@@ -12,7 +12,7 @@
 class grippercontrol{
 
     public: 
-        
+
         robotiq_s_model_control::SModelAPI riq_gripper;
 
     protected:
@@ -20,7 +20,7 @@ class grippercontrol{
         double angleDeg;
         void setRobotiqAngle(double angle);
         void initRobotiq();
-        void gripperCallback(const std_msgs::Float64::ConstPtr& msg);
+        void gripperCallback(const std_msgs::Float64& msg);
 
 };
 #endif
